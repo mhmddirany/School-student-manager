@@ -1,58 +1,49 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Student Management System — Laravel + Livewire
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A practice project built to learn and demonstrate Laravel + Livewire: a real Livewire data table (live search, sort, filter, pagination — no page reloads), breadcrumb navigation, required-field validation that actually blocks submission on the server (not just in the browser), role-based privileges, activity logging via a real database trigger, and a database VIEW + transaction-based "stored procedure equivalent" for safe course enrollment.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Live data table** — search, column sorting, course/status filters, and pagination, all powered by Livewire with no custom JavaScript or page reloads
+- **Required-field validation** — `$this->validate()` runs server-side before any save; if a required field is missing, nothing is written to the database and the form re-renders with inline error messages
+- **Breadcrumbs** — a single reusable `<x-breadcrumbs>` Blade component used across every page
+- **Role-based privileges** — admin / staff / viewer roles enforced through Laravel Gates, checked in three layers: route middleware, component `mount()`, and Blade `@can` directives
+- **Activity logs, two ways on purpose** — student creates/updates are logged automatically by a real `AFTER INSERT` / `AFTER UPDATE` database trigger; deletes, logins, and user management are logged from application code, since a delete trigger can't reliably capture *who* performed the delete
+- **Enrollment "stored procedure"** — `EnrollmentService` wraps a capacity check and the enrollment insert in one `DB::transaction()` with `lockForUpdate()`, giving the same atomicity a stored procedure would provide (SQLite, used here for development, doesn't support real stored procedures — `database/mysql_examples.sql` shows the equivalent real MySQL procedure)
+- **A database VIEW** — `student_enrollment_summary` joins students and courses and computes seats taken, so any page or report can query it directly instead of repeating the join
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Laravel 11, Livewire 3, Blade, SQLite (for local development), MySQL syntax reference included for production-style database objects (views/procedures/triggers).
 
-## Learning Laravel
+## Demo accounts
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Email | Password | Role | Can do |
+|---|---|---|---|
+| admin@example.com | admin123 | admin | Everything — manage students, users, view logs |
+| staff@example.com | staff123 | staff | Create/edit students only |
+| viewer@example.com | viewer123 | viewer | Read-only student list |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Getting started
 
 ```bash
-composer require laravel/boost --dev
+git clone https://github.com/mhmddirany/School-student-manager.git
+cd School-student-manager
 
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+
+# SQLite database file
+touch database/database.sqlite
+# (On Windows PowerShell, use: New-Item database/database.sqlite)
+
+# Make sure .env has: DB_CONNECTION=sqlite
+
+php artisan migrate:fresh --seed
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Then open **http://localhost:8000**.
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## What's where
